@@ -1,14 +1,17 @@
 #!/bin/bash
-# Installation script for Claude Bitbucket DevOps Skill
-# Validates prerequisites, builds in source, then deploys to Claude Code skills directory
+# Installation script for the Bitbucket DevOps Skill
+# Validates prerequisites, builds in source, then deploys to the skill directory.
+# Deploys to Claude Code's ~/.claude/skills/ convention by default; if you're
+# installing for AGY, OC, or another runtime, override TARGET_DIR to that
+# runtime's equivalent skill/tool install location before running this script.
 
 set -e  # Exit on error
 
 SKILL_NAME="bitbucket-devops"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-TARGET_DIR="$HOME/.claude/skills/$SKILL_NAME"
+TARGET_DIR="${TARGET_DIR:-$HOME/.claude/skills/$SKILL_NAME}"
 
-echo "🚀 Installing Claude Bitbucket DevOps Skill..."
+echo "🚀 Installing Bitbucket DevOps Skill..."
 echo ""
 
 # ========== PREREQUISITE CHECKS ==========
@@ -41,10 +44,13 @@ if ! command -v npm &> /dev/null; then
 fi
 echo "✓ npm found: $(npm --version)"
 
-# Check if Claude Code is installed (look for .claude directory potential)
-if [ ! -d "$HOME/.claude" ]; then
+# If deploying to the default Claude Code convention, sanity-check that
+# directory exists first (skip this check entirely if TARGET_DIR was
+# overridden for AGY/OC/another runtime).
+if [ "$TARGET_DIR" = "$HOME/.claude/skills/$SKILL_NAME" ] && [ ! -d "$HOME/.claude" ]; then
     echo "⚠️  Warning: Claude Code directory not found at ~/.claude"
     echo "   This might mean Claude Code is not installed or not configured yet."
+    echo "   (Installing for AGY, OC, or another runtime? Set TARGET_DIR to skip this check.)"
     read -p "   Continue anyway? (y/N): " -n 1 -r
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -61,7 +67,7 @@ echo ""
 if [ ! -d "$SCRIPT_DIR/.git" ]; then
     echo "❌ Error: Not a git repository"
     echo "   Please clone the repository first:"
-    echo "   git clone https://github.com/Apra-Labs/claude-bitbucket-devops-skill.git"
+    echo "   git clone https://github.com/Apra-Labs/bitbucket-devops-skill.git"
     exit 1
 fi
 
@@ -177,13 +183,13 @@ else
         rm -rf "$TARGET_DIR"
     fi
 
-    echo "📦 Deploying built files to Claude Code skills directory..."
+    echo "📦 Deploying built files to the skill directory..."
 
     # Create skills directory if needed
     mkdir -p "$(dirname "$TARGET_DIR")"
     mkdir -p "$TARGET_DIR"
 
-    # Copy only files needed by Claude (selective copy)
+    # Copy only the files needed at runtime (selective copy)
     echo "   Copying SKILL.md..."
     cp "$SCRIPT_DIR/SKILL.md" "$TARGET_DIR/"
 
@@ -306,7 +312,7 @@ echo "2️⃣  Restart VSCode to load the skill"
 echo ""
 echo "3️⃣  Test the skill:"
 echo "    - Open a Bitbucket project in VSCode"
-echo "    - Ask Claude: \"What's the latest failed pipeline?\""
+echo "    - Ask your agent: \"What's the latest failed pipeline?\""
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""

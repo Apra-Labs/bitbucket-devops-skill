@@ -10,8 +10,8 @@ An agent-runtime-agnostic skill for comprehensive Bitbucket DevOps automation - 
 
 **1. Clone and install:**
 ```bash
-git clone --recursive https://github.com/Apra-Labs/claude-bitbucket-devops-skill.git
-cd claude-bitbucket-devops-skill
+git clone --recursive https://github.com/Apra-Labs/bitbucket-devops-skill.git
+cd bitbucket-devops-skill
 bash install.sh
 ```
 
@@ -155,8 +155,8 @@ Create a Bitbucket App Password with these scopes:
 
 ```bash
 # Clone the skill repository
-git clone --recursive https://github.com/Apra-Labs/claude-bitbucket-devops-skill.git
-cd claude-bitbucket-devops-skill
+git clone --recursive https://github.com/Apra-Labs/bitbucket-devops-skill.git
+cd bitbucket-devops-skill
 
 # Run installer
 # Unix/Linux/macOS:
@@ -179,7 +179,7 @@ If you prefer manual setup:
 
 ```bash
 # 1. Clone with submodules
-git clone --recursive https://github.com/Apra-Labs/claude-bitbucket-devops-skill.git ~/.claude/skills/bitbucket-devops
+git clone --recursive https://github.com/Apra-Labs/bitbucket-devops-skill.git ~/.claude/skills/bitbucket-devops
 cd ~/.claude/skills/bitbucket-devops
 
 # 2. Build the bitbucket-mcp library
@@ -401,7 +401,7 @@ You: Show me the last 20 builds
 
 ## Updating
 
-This skill is installed locally with no built-in auto-update - once installed, it won't notice when [this repo's `main`](https://github.com/Apra-Labs/claude-bitbucket-devops-skill) moves forward unless you check.
+This skill is installed locally with no built-in auto-update - once installed, it won't notice when [this repo's `main`](https://github.com/Apra-Labs/bitbucket-devops-skill) moves forward unless you check.
 
 **Check for updates (report only, changes nothing):**
 ```bash
@@ -449,8 +449,8 @@ See [LICENSE](./LICENSE) for full details.
 
 ## Support
 
-- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/Apra-Labs/claude-bitbucket-devops-skill/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/Apra-Labs/claude-bitbucket-devops-skill/discussions)
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/Apra-Labs/bitbucket-devops-skill/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/Apra-Labs/bitbucket-devops-skill/discussions)
 - 📖 **Documentation**: This README and [SKILL.md](./SKILL.md)
 
 ## Roadmap

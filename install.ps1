@@ -1,7 +1,7 @@
-# PowerShell Installation Wrapper for Claude Bitbucket DevOps Skill
+# PowerShell Installation Wrapper for the Bitbucket DevOps Skill
 # This is a thin wrapper that delegates to install.sh to maintain DRY principle
 
-Write-Host "🚀 Claude Bitbucket DevOps Skill - Windows Installer" -ForegroundColor Cyan
+Write-Host "🚀 Bitbucket DevOps Skill - Windows Installer" -ForegroundColor Cyan
 Write-Host ""
 
 # Check if bash is available (Git Bash, WSL, etc.)
