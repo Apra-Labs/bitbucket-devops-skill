@@ -41,6 +41,7 @@ These solve common workflows in a single command. If the user's request matches 
 - `create-deploy-variable <workspace> <repo> <environment> <key> <value> [secured]` - Add a deployment variable
 - `update-deploy-variable <workspace> <repo> <environment> <variable> [key] [value] [secured]` - Update a deployment variable
 - `delete-deploy-variable <workspace> <repo> <environment> <variable>` - Delete a deployment variable
+- `check-credentials` - Reports which credential file is active and whether it's shaped correctly (field names, format validity), WITHOUT ever printing a secret value. Run this instead of opening/catting a credentials file directly to debug an auth problem.
 
 **MUST use for:** "latest failed build", "download logs for pipeline #123", "what failed in this build", "get pipeline by number", "create a sandbox/production deployment environment", "add a deployment secret/variable", "list deployment environments"
 
@@ -149,25 +150,33 @@ Bitbucket Cloud's REST API v2.0 **does** support creating and managing repositor
 
 Full details, endpoints, and JSON shapes: [docs/REFERENCE.md](docs/REFERENCE.md#deployment-environments--variables).
 
-### ⚠️ Scope Warning: The Configured App Password Is Likely Insufficient
+### ⚠️ Scope Requirements (CONFIRMED empirically, 2026-07)
 
-This skill's documented app-password scope is **`Repositories: Read, Pipelines: Read`** - read-only, CI-monitoring-focused. That scope is **NOT enough** for the write operations above:
+This skill's originally documented scope (`Repositories: Read, Pipelines: Read` under the classic app-password model) is **NOT enough** for the write operations below. Confirmed against a real repo using Atlassian's newer **"API token with scopes"** credential type (a separate creation flow from the plain/classic API token at https://id.atlassian.com/manage-profile/security/api-tokens -- a classic unscoped token carries **zero** Bitbucket scopes regardless of account privileges, and fails with `"API Token provided has no Bitbucket scopes"` if used against Bitbucket's API at all):
 
-| Operation | Required scope |
-|---|---|
-| `list-environments`, `list-deploy-variables` (read) | `Repositories: Read` - already covered |
-| `create-deploy-variable`, `update-deploy-variable`, `delete-deploy-variable` | **`Pipelines: Edit variables`** (`pipeline:variable`) - explicitly documented by Atlassian. **NOT currently granted.** |
-| `create-environment` | **Undocumented by Atlassian.** Likely `Pipelines: Write` or `Repositories: Admin` - not confirmed. Try `Pipelines: Write` first; if it 403s, regenerate with `Repositories: Admin`. |
+| Operation | Required scope (Atlassian scoped-token name) | Classic app-password equivalent |
+|---|---|---|
+| `list-environments`, `list-deploy-variables` (read) | `read:repository:bitbucket` | `Repositories: Read` |
+| pipeline read commands (list-pipelines, get-pipeline*, etc.) | `read:pipeline:bitbucket` | `Pipelines: Read` |
+| `create-deploy-variable`, `update-deploy-variable`, `delete-deploy-variable` | `write:pipeline:bitbucket` -- confirmed sufficient in practice, no separate "edit variables" scope exists in the scoped-token model | `Pipelines: Edit variables` |
+| `create-environment` | **`admin:pipeline:bitbucket`** -- CONFIRMED via a live 403 response (see below); `write:pipeline:bitbucket` alone is NOT sufficient | Unclear under the classic model; likely needs `Repositories: Admin` |
+| `approve-pr`/`merge-pr`/`decline-pr` | `write:pullrequest:bitbucket` | `Pull requests: Write` |
 
-**Before these three write commands will work, the user must regenerate their Bitbucket app password** at https://bitbucket.org/account/settings/app-passwords/ with at least `Repositories: Read` + `Pipelines: Edit variables` added (and `Repositories: Admin` if `create-environment` 403s under a lesser scope), then update `credentials.json`.
+**Debugging tip, generalizable to any scope-mismatch**: Bitbucket's 403 response for a scope failure is self-diagnosing -- it returns a JSON body with both `required` and `granted` scope arrays, e.g.:
+```json
+{"error":{"message":"Your credentials lack one or more required privilege scopes.","detail":{"required":["admin:pipeline:bitbucket"],"granted":["read:repository:bitbucket","write:pipeline:bitbucket", ...]}}}
+```
+Read this directly rather than guessing which scope to add next -- it names the exact missing scope.
+
+**Before the write commands above will work**, generate an Atlassian **API token with scopes** (not the plain "Create API token" button, which produces a Bitbucket-incompatible classic token) with the scopes needed for the operations you intend to use, then update your credentials file's `password` field. Run `check-credentials` (see below) first to confirm the file shape is valid before testing scope.
 
 ### ⚠️ App Passwords Are Being Retired
 
-Atlassian has an active brownout/deprecation schedule for Bitbucket app passwords, ending in **full removal**. Before investing in a new app-password scope, check the current status at https://bitbucket.org/account/settings/app-passwords/ and Atlassian's Bitbucket Cloud deprecation announcements - **API tokens** (Atlassian account email + API token, still Basic auth) are the forward-compatible replacement and should be used for any credential created or rotated from now on. The credential-loading code in this skill is auth-mechanism agnostic (Basic auth over `email:secret`), so switching from an app password to an API token is a drop-in `credentials.json` update, not a code change.
+Atlassian has an active brownout/deprecation schedule for Bitbucket app passwords, ending in **full removal**. Before investing in a new app-password scope, check the current status at https://bitbucket.org/account/settings/app-passwords/ and Atlassian's Bitbucket Cloud deprecation announcements - **API tokens with scopes** (Atlassian account email + scoped API token, still Basic auth) are the forward-compatible replacement and should be used for any credential created or rotated from now on. The credential-loading code in this skill is auth-mechanism agnostic (Basic auth over `email:secret`), so switching from an app password to an API token is a drop-in credentials-file update, not a code change.
 
-### Known gap: exact `environment_type` casing is unconfirmed
+### `environment_type` casing: CONFIRMED
 
-Bitbucket's create-environment endpoint is not in the official API reference. Sources disagree on whether `environment_type.name` is `"Test"/"Staging"/"Production"` (title case) or `"TEST"/"STAGING"/"PRODUCTION"` (upper case). Before scripting a real create, run `list-environments` against a repo that already has environments configured by hand in the web UI, and copy the exact casing Bitbucket returns.
+Bitbucket's create-environment endpoint is not in the official API reference, but empirically, **title case works**: `environment_type.name` of `"Test"`, `"Staging"`, or `"Production"` is accepted and echoed back correctly by a real `create-environment` call and subsequent `list-environments` reads. Upper-case (`"TEST"`, etc.) has not been tested and title case should be used.
 
 ### Secured variable values are write-only
 
