@@ -239,6 +239,21 @@ fi
 
 echo ""
 
+# ========== VERSION MARKER ==========
+# Records the installed commit so `check-for-updates`/`self-update` (see
+# lib/helpers.js) can tell whether this install is behind main -- needed
+# for file-copy deployments (no .git in TARGET_DIR to read HEAD from).
+
+INSTALLED_COMMIT=$(git -C "$SCRIPT_DIR" rev-parse HEAD 2>/dev/null || echo "unknown")
+cat > "$TARGET_DIR/.install-version.json" <<EOF
+{
+  "commit": "$INSTALLED_COMMIT",
+  "installedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+}
+EOF
+echo "✓ Recorded installed version ($INSTALLED_COMMIT) for self-update checks"
+echo ""
+
 # ========== COMPLETION ==========
 
 echo "✅ Installation complete!"
