@@ -35,8 +35,16 @@ These solve common workflows in a single command. If the user's request matches 
 - `get-failed-steps <workspace> <repo> <pipeline-uuid>` - Get all failed steps
 - `download-failed-logs <workspace> <repo> <pipeline-uuid> <build-number>` - Download all failed step logs
 - `get-info <workspace> <repo> <pipeline-uuid>` - Get formatted pipeline + steps info
+- `list-environments <workspace> <repo>` - List deployment environments (sandbox/production/etc)
+- `create-environment <workspace> <repo> <name> [environment_type] [rank]` - Create a deployment environment
+- `list-deploy-variables <workspace> <repo> <environment>` - List secured deployment variables for an environment
+- `create-deploy-variable <workspace> <repo> <environment> <key> <value> [secured]` - Add a deployment variable
+- `update-deploy-variable <workspace> <repo> <environment> <variable> [key] [value] [secured]` - Update a deployment variable
+- `delete-deploy-variable <workspace> <repo> <environment> <variable>` - Delete a deployment variable
 
-**MUST use for:** "latest failed build", "download logs for pipeline #123", "what failed in this build", "get pipeline by number"
+**MUST use for:** "latest failed build", "download logs for pipeline #123", "what failed in this build", "get pipeline by number", "create a sandbox/production deployment environment", "add a deployment secret/variable", "list deployment environments"
+
+**Requires a different app-password scope than the rest of this skill** - see [Deployment Environments & Variables](#deployment-environments--variables-new) below before using these six commands.
 
 **Usage:**
 ```bash
@@ -127,6 +135,46 @@ Before using Tier 3, you MUST:
 
 ---
 
+## Deployment Environments & Variables (NEW)
+
+Bitbucket Cloud's REST API v2.0 **does** support creating and managing repository "Deployment environments" (Repository settings → Pipelines → Deployments, e.g. "sandbox", "production") and their secured deployment variables. This was previously undocumented in this skill - it's now available via six new Tier 1 helpers.
+
+**Available Commands** (`node ~/.claude/skills/bitbucket-devops/lib/helpers.js <command> <args>`):
+- `list-environments <workspace> <repo>`
+- `create-environment <workspace> <repo> <name> [environment_type=Test] [rank]`
+- `list-deploy-variables <workspace> <repo> <environment_name_or_uuid>`
+- `create-deploy-variable <workspace> <repo> <environment_name_or_uuid> <key> <value> [secured=true]`
+- `update-deploy-variable <workspace> <repo> <environment_name_or_uuid> <variable_key_or_uuid> [key] [value] [secured]`
+- `delete-deploy-variable <workspace> <repo> <environment_name_or_uuid> <variable_key_or_uuid>`
+
+Full details, endpoints, and JSON shapes: [docs/REFERENCE.md](docs/REFERENCE.md#deployment-environments--variables).
+
+### ⚠️ Scope Warning: The Configured App Password Is Likely Insufficient
+
+This skill's documented app-password scope is **`Repositories: Read, Pipelines: Read`** - read-only, CI-monitoring-focused. That scope is **NOT enough** for the write operations above:
+
+| Operation | Required scope |
+|---|---|
+| `list-environments`, `list-deploy-variables` (read) | `Repositories: Read` - already covered |
+| `create-deploy-variable`, `update-deploy-variable`, `delete-deploy-variable` | **`Pipelines: Edit variables`** (`pipeline:variable`) - explicitly documented by Atlassian. **NOT currently granted.** |
+| `create-environment` | **Undocumented by Atlassian.** Likely `Pipelines: Write` or `Repositories: Admin` - not confirmed. Try `Pipelines: Write` first; if it 403s, regenerate with `Repositories: Admin`. |
+
+**Before these three write commands will work, the user must regenerate their Bitbucket app password** at https://bitbucket.org/account/settings/app-passwords/ with at least `Repositories: Read` + `Pipelines: Edit variables` added (and `Repositories: Admin` if `create-environment` 403s under a lesser scope), then update `credentials.json`.
+
+### ⚠️ App Passwords Are Being Retired
+
+Atlassian has an active brownout/deprecation schedule for Bitbucket app passwords, ending in **full removal**. Before investing in a new app-password scope, check the current status at https://bitbucket.org/account/settings/app-passwords/ and Atlassian's Bitbucket Cloud deprecation announcements - **API tokens** (Atlassian account email + API token, still Basic auth) are the forward-compatible replacement and should be used for any credential created or rotated from now on. The credential-loading code in this skill is auth-mechanism agnostic (Basic auth over `email:secret`), so switching from an app password to an API token is a drop-in `credentials.json` update, not a code change.
+
+### Known gap: exact `environment_type` casing is unconfirmed
+
+Bitbucket's create-environment endpoint is not in the official API reference. Sources disagree on whether `environment_type.name` is `"Test"/"Staging"/"Production"` (title case) or `"TEST"/"STAGING"/"PRODUCTION"` (upper case). Before scripting a real create, run `list-environments` against a repo that already has environments configured by hand in the web UI, and copy the exact casing Bitbucket returns.
+
+### Secured variable values are write-only
+
+Once a variable is created with `secured: true` (the default for `create-deploy-variable`), its `value` is never returned by any subsequent `GET`/`list-deploy-variables` call - this matches the Bitbucket web UI's behavior for secrets. `update-deploy-variable` can replace the value; there is no way to read it back via the API.
+
+---
+
 ## Known Limitations
 
 ### Pipeline Artifacts Cannot Be Downloaded via API
@@ -198,7 +246,9 @@ Credentials are loaded with priority (first found wins):
 - `user_email`: Your Bitbucket account email (for API authentication) - MUST contain `@`
 - `username`: Your Bitbucket workspace slug (for git operations) - MUST NOT contain `@`
 - `password`: App password from https://bitbucket.org/account/settings/app-passwords/
-  - Required permissions: Repositories: Read, Pipelines: Read
+  - Required permissions for existing (pipeline/PR/repo) commands: Repositories: Read, Pipelines: Read
+  - Required permissions for the new deployment environment/variable commands: **Pipelines: Edit variables** at minimum, likely also **Repositories: Admin** for `create-environment` - see [Deployment Environments & Variables](#deployment-environments--variables-new). Not covered by the scope above - regenerate the app password to add write scopes before using those six commands.
+  - Note: app passwords are being deprecated by Atlassian in favor of API tokens - check https://bitbucket.org/account/settings/app-passwords/ for current status before regenerating.
 
 See [docs/GIT_OPERATIONS.md](docs/GIT_OPERATIONS.md) for details on credential requirements.
 
