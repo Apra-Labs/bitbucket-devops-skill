@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **`create-pr` CLI command** (Tier 2) — create a pull request directly:
+  `create-pr <workspace> <repo> <title> <source_branch> <target_branch> [description] [reviewers_csv]`.
+  The underlying `client.createPullRequest()` already existed, but no CLI command exposed it,
+  forcing agents to drop to a raw Tier 3 REST call to `POST .../pullrequests`. Fixes #4.
+  Documented in `SKILL.md` (Tier 2 list + scope table) and `docs/REFERENCE.md`.
+
 ## [1.2.1] - 2025-11-04
 
 ### Fixed
