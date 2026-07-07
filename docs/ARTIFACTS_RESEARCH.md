@@ -152,7 +152,7 @@ node helpers.js download-latest-artifact <workspace> <repo> <pattern>
 ### Usage Pattern:
 ```bash
 # User: "Download the latest licensing libraries build"
-# Claude:
+# Agent:
 node helpers.js download-latest-artifact "kumaakh" "apra-licensing-core" "apra-licensing-libs-*.zip"
 ```
 

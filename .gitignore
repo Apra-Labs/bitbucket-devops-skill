@@ -5,6 +5,10 @@
 credentials.json
 .bitbucket-credentials
 
+# Self-update version marker (written by install.sh, read by
+# check-for-updates/self-update; local-install state, not source)
+.install-version.json
+
 # IDE
 .vscode/
 .idea/

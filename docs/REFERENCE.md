@@ -127,6 +127,121 @@ node ~/.claude/skills/bitbucket-devops/lib/helpers.js clone-repo <workspace> <re
 
 ---
 
+## Deployment Environments & Variables
+
+**Purpose:** Create/manage "Deployment environments" (Repository settings → Pipelines → Deployments) and their secured variables.
+**Location:** `~/.claude/skills/bitbucket-devops/lib/helpers.js` (Tier 1 - these are NOT in the vendored `bitbucket-mcp` submodule; they make direct authenticated HTTPS calls to `api.bitbucket.org` using Node's built-in `https` module, following the same credential-file convention as everything else in this skill).
+**Usage:** `node ~/.claude/skills/bitbucket-devops/lib/helpers.js <command> <args>`
+
+### API support and documentation status
+
+Bitbucket Cloud's REST API v2.0 supports this, but the **environments** endpoints are not part of Atlassian's official public API reference - an Atlassian staffer confirmed on the Atlassian Community forum that the create-environment endpoint "is not yet documented" (a ticket exists to add it). The endpoints work in practice; treat them as stable-but-unofficial. The **deployment variables** endpoints ARE officially documented.
+
+### Endpoints
+
+**Environments:**
+```
+GET    /2.0/repositories/{workspace}/{repo_slug}/environments/
+POST   /2.0/repositories/{workspace}/{repo_slug}/environments/
+GET    /2.0/repositories/{workspace}/{repo_slug}/environments/{environment_uuid}
+PUT    /2.0/repositories/{workspace}/{repo_slug}/environments/{environment_uuid}
+DELETE /2.0/repositories/{workspace}/{repo_slug}/environments/{environment_uuid}
+```
+
+Create request body:
+```json
+{
+  "name": "sandbox",
+  "environment_type": { "name": "Test" },
+  "rank": 0
+}
+```
+`environment_type.name` is Bitbucket's environment *category* (distinct from your custom environment `name`) and drives which deployment permissions/restrictions are available in the UI. Expected values: `"Test"`, `"Staging"`, `"Production"`. **Casing is unconfirmed from documentation** - sources disagree between title case (`"Test"`) and upper case (`"TEST"`). Run `list-environments` against a repo with an existing hand-configured environment first and copy the exact casing Bitbucket returns before scripting a real `create-environment` call.
+
+**Deployment variables** (officially documented):
+```
+GET    /2.0/repositories/{workspace}/{repo_slug}/deployments_config/environments/{environment_uuid}/variables/
+POST   /2.0/repositories/{workspace}/{repo_slug}/deployments_config/environments/{environment_uuid}/variables/
+PUT    /2.0/repositories/{workspace}/{repo_slug}/deployments_config/environments/{environment_uuid}/variables/{variable_uuid}
+DELETE /2.0/repositories/{workspace}/{repo_slug}/deployments_config/environments/{environment_uuid}/variables/{variable_uuid}
+```
+
+Request/response body fields: `type`, `uuid`, `key`, `value`, `secured` (boolean). Once a variable is created with `secured: true`, its `value` is never returned by any subsequent GET - this is documented UI/product behavior for secrets (write-only after creation; you can replace or delete, never read back).
+
+### Required scope
+
+| Operation | Scope |
+|---|---|
+| List environments / list variables (read) | `Repositories: Read` |
+| Create/update/delete deployment **variables** | `Pipelines: Edit variables` (`pipeline:variable`) - explicitly documented by Atlassian at the app-password-permissions page |
+| Create/update/delete **environments** | Not documented. Try `Pipelines: Write` first; fall back to `Repositories: Admin` if you get a 403 |
+
+The scope this skill currently documents (`Repositories: Read, Pipelines: Read`) does **not** include `Pipelines: Edit variables` and is very unlikely to include environment-write access. **The write commands below will 401/403 until the app password is regenerated with the additional scope(s).**
+
+App passwords are also in an active Atlassian deprecation/brownout cycle heading toward removal - prefer API tokens (email + token, Basic auth) for any credential you create or rotate now; this skill's credential format and request code work unchanged either way.
+
+### Commands
+
+#### list-environments
+```bash
+node ~/.claude/skills/bitbucket-devops/lib/helpers.js list-environments <workspace> <repo>
+```
+**Returns:** `{ page, values: [ { uuid, name, environment_type, rank, ... } ], size, pagelen }`. Read-only - works under the currently documented scope.
+
+---
+
+#### create-environment
+```bash
+node ~/.claude/skills/bitbucket-devops/lib/helpers.js create-environment <workspace> <repo> <name> [environment_type=Test] [rank]
+```
+**Example:**
+```bash
+node ~/.claude/skills/bitbucket-devops/lib/helpers.js create-environment kumaakh apra-fleet-cloud sandbox Test 0
+node ~/.claude/skills/bitbucket-devops/lib/helpers.js create-environment kumaakh apra-fleet-cloud production Production 1
+```
+**Returns:** The created environment object (includes its `uuid`, needed for the variable commands below unless you pass the environment `name` instead - all variable commands accept either).
+
+**Requires write scope** - see table above.
+
+---
+
+#### list-deploy-variables
+```bash
+node ~/.claude/skills/bitbucket-devops/lib/helpers.js list-deploy-variables <workspace> <repo> <environment_name_or_uuid>
+```
+**Returns:** `{ values: [ { uuid, key, secured, value? } ] }` - `value` is omitted/absent for `secured: true` variables.
+
+---
+
+#### create-deploy-variable
+```bash
+node ~/.claude/skills/bitbucket-devops/lib/helpers.js create-deploy-variable <workspace> <repo> <environment_name_or_uuid> <key> <value> [secured=true]
+```
+**Example:**
+```bash
+node ~/.claude/skills/bitbucket-devops/lib/helpers.js create-deploy-variable kumaakh apra-fleet-cloud sandbox AWS_SECRET_ACCESS_KEY "..." true
+node ~/.claude/skills/bitbucket-devops/lib/helpers.js create-deploy-variable kumaakh apra-fleet-cloud sandbox AWS_REGION us-east-1 false
+```
+`secured` defaults to `true` - pass `false` explicitly only for genuinely non-secret values. **Requires `Pipelines: Edit variables` scope.**
+
+---
+
+#### update-deploy-variable
+```bash
+node ~/.claude/skills/bitbucket-devops/lib/helpers.js update-deploy-variable <workspace> <repo> <environment_name_or_uuid> <variable_key_or_uuid> [key] [value] [secured]
+```
+Pass only the fields you want to change; omitted fields keep their current value. `value` cannot be read back for `secured` variables, so "updating" one is really "blind-replacing" it. **Requires `Pipelines: Edit variables` scope.**
+
+---
+
+#### delete-deploy-variable
+```bash
+node ~/.claude/skills/bitbucket-devops/lib/helpers.js delete-deploy-variable <workspace> <repo> <environment_name_or_uuid> <variable_key_or_uuid>
+```
+**Requires `Pipelines: Edit variables` scope.**
+
+---
+
 ## Tier 2: Low-Level CLI Commands
 
 **Purpose:** Direct API wrappers for specific operations.
