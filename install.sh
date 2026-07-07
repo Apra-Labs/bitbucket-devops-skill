@@ -1,17 +1,86 @@
 #!/bin/bash
 # Installation script for the Bitbucket DevOps Skill
-# Validates prerequisites, builds in source, then deploys to the skill directory.
-# Deploys to Claude Code's ~/.claude/skills/ convention by default; if you're
-# installing for AGY, OC, or another runtime, override TARGET_DIR to that
-# runtime's equivalent skill/tool install location before running this script.
+# Validates prerequisites, builds in source, then deploys to the skill directory
+# for the selected agent runtime (--llm claude|agy|opencode, default: claude).
 
 set -e  # Exit on error
 
 SKILL_NAME="bitbucket-devops"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-TARGET_DIR="${TARGET_DIR:-$HOME/.claude/skills/$SKILL_NAME}"
 
-echo "🚀 Installing Bitbucket DevOps Skill..."
+# ========== ARGUMENT PARSING ==========
+
+LLM="claude"
+
+usage() {
+    echo "Usage: install.sh [--llm <provider>]"
+    echo ""
+    echo "  --llm <provider>   Agent runtime to install this skill for."
+    echo "                     Supported: claude (default), agy, opencode."
+    echo ""
+    echo "  TARGET_DIR         Env var override for the install directory,"
+    echo "                     e.g. TARGET_DIR=/custom/path install.sh --llm agy"
+    echo "                     Takes priority over --llm's computed default."
+}
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --llm=*)
+            LLM="${1#--llm=}"
+            shift
+            ;;
+        --llm)
+            if [ -z "$2" ]; then
+                echo "❌ Error: --llm requires a value (claude, agy, opencode)"
+                exit 1
+            fi
+            LLM="$2"
+            shift 2
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        *)
+            echo "❌ Error: Unknown argument: $1"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+# Normalize to lowercase for case-insensitive matching (AGY, OpenCode, etc.)
+LLM="$(echo "$LLM" | tr '[:upper:]' '[:lower:]')"
+
+# Map the selected runtime to its skill-install convention. These mirror
+# apra-fleet's per-provider skillsDir layout (src/cli/config.ts,
+# getProviderInstallConfig()) for the providers this skill supports.
+case "$LLM" in
+    claude)
+        LLM_DISPLAY_NAME="Claude Code"
+        SKILLS_BASE_DIR="$HOME/.claude/skills"
+        RUNTIME_CONFIG_DIR="$HOME/.claude"
+        ;;
+    agy)
+        LLM_DISPLAY_NAME="AGY (Antigravity)"
+        SKILLS_BASE_DIR="$HOME/.gemini/antigravity-cli/skills"
+        RUNTIME_CONFIG_DIR="$HOME/.gemini/antigravity-cli"
+        ;;
+    opencode)
+        LLM_DISPLAY_NAME="OpenCode"
+        SKILLS_BASE_DIR="$HOME/.config/opencode/skills"
+        RUNTIME_CONFIG_DIR="$HOME/.config/opencode"
+        ;;
+    *)
+        echo "❌ Error: Unsupported --llm value: $LLM"
+        echo "   Supported: claude, agy, opencode"
+        exit 1
+        ;;
+esac
+
+TARGET_DIR="${TARGET_DIR:-$SKILLS_BASE_DIR/$SKILL_NAME}"
+
+echo "🚀 Installing Bitbucket DevOps Skill for $LLM_DISPLAY_NAME..."
 echo ""
 
 # ========== PREREQUISITE CHECKS ==========
@@ -44,13 +113,13 @@ if ! command -v npm &> /dev/null; then
 fi
 echo "✓ npm found: $(npm --version)"
 
-# If deploying to the default Claude Code convention, sanity-check that
-# directory exists first (skip this check entirely if TARGET_DIR was
-# overridden for AGY/OC/another runtime).
-if [ "$TARGET_DIR" = "$HOME/.claude/skills/$SKILL_NAME" ] && [ ! -d "$HOME/.claude" ]; then
-    echo "⚠️  Warning: Claude Code directory not found at ~/.claude"
-    echo "   This might mean Claude Code is not installed or not configured yet."
-    echo "   (Installing for AGY, OC, or another runtime? Set TARGET_DIR to skip this check.)"
+# If deploying to the selected runtime's default convention, sanity-check
+# that its config directory exists first (skip this check entirely if
+# TARGET_DIR was overridden to a custom path).
+if [ "$TARGET_DIR" = "$SKILLS_BASE_DIR/$SKILL_NAME" ] && [ ! -d "$RUNTIME_CONFIG_DIR" ]; then
+    echo "⚠️  Warning: $LLM_DISPLAY_NAME directory not found at $RUNTIME_CONFIG_DIR"
+    echo "   This might mean $LLM_DISPLAY_NAME is not installed or not configured yet."
+    echo "   (Installing for a different runtime? Use --llm claude|agy|opencode, or set TARGET_DIR directly.)"
     read -p "   Continue anyway? (y/N): " -n 1 -r
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -308,10 +377,15 @@ echo "    🔗 Get app password:"
 echo "    https://bitbucket.org/account/settings/app-passwords/"
 echo "    Required scopes: Repository (Read), Pipelines (Read, Write)"
 echo ""
-echo "2️⃣  Restart VSCode to load the skill"
+echo "2️⃣  Reload $LLM_DISPLAY_NAME to load the skill:"
+if [ "$LLM" = "claude" ]; then
+    echo "    - Close and reopen VSCode, or Ctrl+Shift+P -> \"Developer: Reload Window\""
+else
+    echo "    - Use $LLM_DISPLAY_NAME's own skill-reload mechanism"
+fi
 echo ""
 echo "3️⃣  Test the skill:"
-echo "    - Open a Bitbucket project in VSCode"
+echo "    - Open a Bitbucket project"
 echo "    - Ask your agent: \"What's the latest failed pipeline?\""
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

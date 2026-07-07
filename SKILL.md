@@ -6,11 +6,11 @@ allowed-tools: Bash, Read, Write, Grep, Glob
 
 # Bitbucket DevOps Skill
 
-This skill provides comprehensive Bitbucket DevOps automation using direct Node.js API calls via a Bash-equivalent tool. Built on the [bitbucket-mcp](https://github.com/Apra-Labs/bitbucket-mcp) client library. It's plain Node.js CLI invocation with no Claude-specific dependency, so it runs unchanged under Claude Code, AGY, OC, or any other agent runtime that can shell out to `node`.
+This skill provides comprehensive Bitbucket DevOps automation using direct Node.js API calls via a Bash-equivalent tool. Built on the [bitbucket-mcp](https://github.com/Apra-Labs/bitbucket-mcp) client library. It's plain Node.js CLI invocation with no Claude-specific dependency, so it runs unchanged under Claude Code, AGY, OpenCode, or any other agent runtime that can shell out to `node`.
 
-**Note on paths:** Paths below (`~/.claude/skills/bitbucket-devops/...`) reflect Claude Code's skill-install convention. If you're running this under AGY, OC, or another runtime, substitute that runtime's equivalent skill/tool install location - the commands themselves are identical.
+**Note on paths:** Paths below (`~/.claude/skills/bitbucket-devops/...`) reflect Claude Code's skill-install convention, since `install.sh`/`install.ps1` default to `--llm claude`. If this skill was installed with `--llm agy` or `--llm opencode`, substitute `~/.gemini/antigravity-cli/skills/bitbucket-devops/` or `~/.config/opencode/skills/bitbucket-devops/` respectively (or whatever `TARGET_DIR` was used) - the commands themselves are identical.
 
-**Key Advantage:** Uses direct Node.js calls via a Bash-equivalent tool instead of MCP tools. This works the same way in any agent runtime that can invoke shell commands (Claude Code, AGY, OC, etc.) - there's no Claude-specific API or tool assumption anywhere in this skill's code. In Claude Code specifically, Bash is auto-approved by default, which also eliminates the MCP approval-prompt friction described in [GitHub Issue #10801](https://github.com/anthropics/claude-code/issues/10801); other runtimes may have their own approval model for shell commands, but the underlying calls are identical either way.
+**Key Advantage:** Uses direct Node.js calls via a Bash-equivalent tool instead of MCP tools. This works the same way in any agent runtime that can invoke shell commands (Claude Code, AGY, OpenCode, etc.) - there's no Claude-specific API or tool assumption anywhere in this skill's code. In Claude Code specifically, Bash is auto-approved by default, which also eliminates the MCP approval-prompt friction described in [GitHub Issue #10801](https://github.com/anthropics/claude-code/issues/10801); other runtimes may have their own approval model for shell commands, but the underlying calls are identical either way.
 
 ## ⚠️ MANDATORY: How to Approach User Requests
 
@@ -210,7 +210,7 @@ Once a variable is created with `secured: true` (the default for `create-deploy-
 
 Traditional pipeline debugging is slow: push code → wait → fail → investigate logs → fix → repeat (hours per cycle).
 
-This skill enables a **REPL-like experience for DevOps**: your agent observes pipelines in real-time, analyzes failures instantly, suggests precise fixes, and iterates with you until builds pass - reducing debugging cycles from hours to minutes. This works the same in Claude Code, AGY, OC, or any other runtime driving this skill.
+This skill enables a **REPL-like experience for DevOps**: your agent observes pipelines in real-time, analyzes failures instantly, suggests precise fixes, and iterates with you until builds pass - reducing debugging cycles from hours to minutes. This works the same in Claude Code, AGY, OpenCode, or any other runtime driving this skill.
 
 **The Loop:**
 1. **Read**: Monitor pipeline execution and capture failures
@@ -224,7 +224,7 @@ This transforms DevOps from slow batch processing into interactive, conversation
 
 ## Prerequisites
 
-This skill uses a Bash-equivalent tool (auto-approved in Claude Code; check your runtime's docs for AGY/OC/others) to run Node.js commands. Required:
+This skill uses a Bash-equivalent tool (auto-approved in Claude Code; check your runtime's docs for AGY/OpenCode/others) to run Node.js commands. Required:
 - Node.js (v18+)
 - Git (for submodule management)
 

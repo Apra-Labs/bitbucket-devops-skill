@@ -1,6 +1,6 @@
 # Bitbucket DevOps Skill
 
-An agent-runtime-agnostic skill for comprehensive Bitbucket DevOps automation - manage pipelines, repositories, pull requests, and CI/CD workflows. It's a plain, Bash-invocable Node.js CLI with no Claude-specific API or tool dependency, so it works as-is with [Claude Code](https://claude.ai/code), AGY, OC, and any other agent runtime that can shell out to `node`. Built on the [bitbucket-mcp](https://github.com/MatanYemini/bitbucket-mcp) Model Context Protocol server, used here purely as a library (see [How This Skill Works](#how-this-skill-works)).
+An agent-runtime-agnostic skill for comprehensive Bitbucket DevOps automation - manage pipelines, repositories, pull requests, and CI/CD workflows. It's a plain, Bash-invocable Node.js CLI with no Claude-specific API or tool dependency, so it works as-is with [Claude Code](https://claude.ai/code), AGY, OpenCode, and any other agent runtime that can shell out to `node`. Built on the [bitbucket-mcp](https://github.com/MatanYemini/bitbucket-mcp) Model Context Protocol server, used here purely as a library (see [How This Skill Works](#how-this-skill-works)).
 
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 
@@ -12,8 +12,11 @@ An agent-runtime-agnostic skill for comprehensive Bitbucket DevOps automation - 
 ```bash
 git clone --recursive https://github.com/Apra-Labs/bitbucket-devops-skill.git
 cd bitbucket-devops-skill
-bash install.sh
+bash install.sh                # installs for Claude Code (default)
+bash install.sh --llm agy      # or: install for AGY (Antigravity)
+bash install.sh --llm opencode # or: install for OpenCode
 ```
+On Windows: `powershell -ExecutionPolicy Bypass -File install.ps1 -Llm agy` (see [Installation](#installation) below).
 
 **2. Get Bitbucket App Password:**
 - Go to: https://bitbucket.org/account/settings/app-passwords/
@@ -27,7 +30,7 @@ nano ~/.claude/skills/bitbucket-devops/credentials.json
 
 **4. Reload the skill in your agent runtime:**
 - Claude Code: Close and reopen VSCode, or `Ctrl+Shift+P` → "Developer: Reload Window"
-- AGY / OC / other runtimes: follow that runtime's own skill-reload mechanism
+- AGY / OpenCode / other runtimes: follow that runtime's own skill-reload mechanism
 
 **5. Test it:**
 ```
@@ -75,7 +78,7 @@ Pipeline development is painfully slow:
 
 ### The Agent-Powered Solution: AI-Powered DevOps REPL
 
-With this skill, your coding agent (Claude Code, AGY, OC, or another compatible runtime) transforms pipeline development into a rapid **Read-Eval-Print Loop**:
+With this skill, your coding agent (Claude Code, AGY, OpenCode, or another compatible runtime) transforms pipeline development into a rapid **Read-Eval-Print Loop**:
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
@@ -99,7 +102,7 @@ With this skill, your coding agent (Claude Code, AGY, OC, or another compatible 
 - **Faster Debugging**: AI analyzes thousands of log lines in seconds
 - **Continuous Learning**: Your agent remembers patterns across pipeline runs
 - **Zero Manual Steps**: From failure detection to fix suggestion - fully automated observation
-- **Runtime-Agnostic**: Works identically under Claude Code, AGY, OC, or any runtime that can invoke a Bash-equivalent tool
+- **Runtime-Agnostic**: Works identically under Claude Code, AGY, OpenCode, or any runtime that can invoke a Bash-equivalent tool
 
 **Example Conversation:**
 ```
@@ -124,7 +127,7 @@ This skill works with any agent runtime that can shell out to Node.js CLI comman
 
 - **Claude Code**: Install the extension for VSCode - [Visual Studio Code Extension](https://marketplace.visualstudio.com/items?itemName=Anthropic.claude-code)
 - **AGY**: Supported as-is - install per AGY's own skill/tool convention
-- **OC**: Supported as-is - install per OC's own skill/tool convention
+- **OpenCode**: Supported as-is - install per OpenCode's own skill/tool convention
 - Any other runtime with an auto-approved (or approvable) Bash-equivalent tool
 
 ### 2. Node.js & Git
@@ -160,17 +163,25 @@ cd bitbucket-devops-skill
 
 # Run installer
 # Unix/Linux/macOS:
-bash install.sh
+bash install.sh                    # Claude Code (default)
+bash install.sh --llm agy          # AGY (Antigravity)
+bash install.sh --llm opencode     # OpenCode
 
 # Windows (PowerShell):
 powershell -ExecutionPolicy Bypass -File install.ps1
+powershell -ExecutionPolicy Bypass -File install.ps1 -Llm agy
+powershell -ExecutionPolicy Bypass -File install.ps1 -Llm opencode
 ```
 
 The installer will:
 1. ✅ Verify prerequisites (Node.js, Git)
 2. ✅ Initialize the bitbucket-mcp submodule
 3. ✅ Build the CLI tools
-4. ✅ Deploy to `~/.claude/skills/bitbucket-devops/`
+4. ✅ Deploy to the selected runtime's skill directory:
+   - Claude Code (default): `~/.claude/skills/bitbucket-devops/`
+   - AGY: `~/.gemini/antigravity-cli/skills/bitbucket-devops/`
+   - OpenCode: `~/.config/opencode/skills/bitbucket-devops/`
+   - Any runtime, or a custom location: override with the `TARGET_DIR` env var (takes priority over `--llm`)
 5. ✅ Create credentials template
 
 ### Manual Installation
@@ -240,7 +251,7 @@ node ~/.claude/skills/bitbucket-devops/lib/helpers.js get-latest "your-workspace
 
 **Important**: Reload so the skill is picked up:
 - **Claude Code**: Close and reopen VSCode, or `Ctrl+Shift+P` → "Developer: Reload Window"
-- **AGY / OC / other runtimes**: use that runtime's own skill-reload mechanism
+- **AGY / OpenCode / other runtimes**: use that runtime's own skill-reload mechanism
 
 ### Test the Skill
 
@@ -279,7 +290,7 @@ In each project where you use this skill, add to `.gitignore`:
 
 ## Usage
 
-Just ask your agent naturally! The skill activates automatically for pipeline-related questions, in Claude Code, AGY, OC, or any other supported runtime.
+Just ask your agent naturally! The skill activates automatically for pipeline-related questions, in Claude Code, AGY, OpenCode, or any other supported runtime.
 
 ### Examples
 
@@ -349,12 +360,12 @@ Unlike traditional MCP-based skills, this skill **does not require running an MC
 
 1. **Git Submodule**: Uses [bitbucket-mcp](https://github.com/Apra-Labs/bitbucket-mcp) as a code library (not a server)
 2. **Direct API Calls**: Executes Node.js commands directly via a Bash-equivalent tool
-3. **Auto-Approved (in Claude Code)**: Bash tool is auto-approved in Claude Code by default - **no approval prompts there!** Other runtimes (AGY, OC, etc.) may have their own approval model for shell commands, but no Claude-specific API or tool is ever required.
+3. **Auto-Approved (in Claude Code)**: Bash tool is auto-approved in Claude Code by default - **no approval prompts there!** Other runtimes (AGY, OpenCode, etc.) may have their own approval model for shell commands, but no Claude-specific API or tool is ever required.
 4. **No MCP Protocol Overhead**: Faster execution, simpler setup
 
 ### Why This Approach?
 
-The traditional MCP server approach (v1.0.0) required manual approval for every API call in Claude Code due to [GitHub Issue #10801](https://github.com/anthropics/claude-code/issues/10801). By using direct Node.js calls through Bash (v1.1.0), we've **eliminated approval-prompt overhead** while maintaining full functionality - and because this is plain Node.js CLI invocation with no Claude-specific dependency, the same benefit applies under AGY, OC, and any other runtime with a comparable auto-approved shell tool.
+The traditional MCP server approach (v1.0.0) required manual approval for every API call in Claude Code due to [GitHub Issue #10801](https://github.com/anthropics/claude-code/issues/10801). By using direct Node.js calls through Bash (v1.1.0), we've **eliminated approval-prompt overhead** while maintaining full functionality - and because this is plain Node.js CLI invocation with no Claude-specific dependency, the same benefit applies under AGY, OpenCode, and any other runtime with a comparable auto-approved shell tool.
 
 **Benefits:**
 - ✅ Zero approval prompts (in runtimes with an auto-approved Bash-equivalent tool)
@@ -362,7 +373,7 @@ The traditional MCP server approach (v1.0.0) required manual approval for every 
 - ✅ Simpler installation
 - ✅ Same powerful API access
 - ✅ Works offline (no server startup)
-- ✅ Works across agent runtimes - Claude Code, AGY, OC, and others - with no code changes
+- ✅ Works across agent runtimes - Claude Code, AGY, OpenCode, and others - with no code changes
 
 ## Troubleshooting
 
@@ -370,7 +381,7 @@ The traditional MCP server approach (v1.0.0) required manual approval for every 
 
 **Solution**: Reload skills in your agent runtime
 - Claude Code: `Ctrl+Shift+P` → "Developer: Reload Window"
-- AGY / OC / other runtimes: use that runtime's own skill-reload mechanism
+- AGY / OpenCode / other runtimes: use that runtime's own skill-reload mechanism
 
 ### "Pipeline not found"
 
@@ -420,7 +431,7 @@ node ~/.claude/skills/bitbucket-devops/lib/helpers.js self-update confirm
 This skill is built on top of:
 
 - **[bitbucket-mcp](https://github.com/Apra-Labs/bitbucket-mcp)** by [Apra Labs](https://github.com/Apra-Labs), forked from [@MatanYemini's original work](https://github.com/MatanYemini/bitbucket-mcp) - Provides the Bitbucket API client library used by this skill
-- Tested and supported with **[Claude Code](https://claude.ai/code)** by [Anthropic](https://www.anthropic.com/), **AGY**, and **OC** - this skill has no Claude-specific dependency and works identically across compatible agent runtimes
+- Tested and supported with **[Claude Code](https://claude.ai/code)** by [Anthropic](https://www.anthropic.com/), **AGY**, and **OpenCode** - this skill has no Claude-specific dependency and works identically across compatible agent runtimes
 
 **Note:** While this skill uses the bitbucket-mcp codebase, it does NOT require running the MCP server. We use it as a library via git submodule.
 
@@ -618,4 +629,4 @@ See [LICENSE](./LICENSE) for full details.
 
 **Maintained by [Apra Labs](https://github.com/Apra-Labs)**
 
-Built with ❤️ for the AI coding agent community - Claude Code, AGY, OC, and beyond
+Built with ❤️ for the AI coding agent community - Claude Code, AGY, OpenCode, and beyond

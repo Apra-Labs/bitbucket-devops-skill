@@ -12,7 +12,7 @@ Found a bug? Please create an issue on GitHub with:
 2. **Steps to reproduce** the problem
 3. **Expected behavior** vs **actual behavior**
 4. **Environment details**:
-   - Agent runtime and version (Claude Code, AGY, OC, etc.)
+   - Agent runtime and version (Claude Code, AGY, OpenCode, etc.)
    - bitbucket-mcp version
    - Operating system
 5. **Logs or screenshots** if applicable
@@ -63,7 +63,7 @@ git checkout -b fix/your-bug-fix
 
 **Manual testing:**
 
-1. Install the modified skill in your local agent runtime (paths below are Claude Code's convention; substitute your runtime's equivalent for AGY/OC):
+1. Install the modified skill in your local agent runtime (paths below are Claude Code's convention; substitute your runtime's equivalent for AGY/OpenCode):
    ```bash
    # Windows
    copy SKILL.md %USERPROFILE%\.claude\skills\bitbucket-devops\
@@ -72,7 +72,7 @@ git checkout -b fix/your-bug-fix
    cp SKILL.md ~/.claude/skills/bitbucket-devops/
    ```
 
-2. Reload your agent runtime (Claude Code: restart VSCode; AGY/OC: use that runtime's reload mechanism)
+2. Reload your agent runtime (Claude Code: restart VSCode; AGY/OpenCode: use that runtime's reload mechanism)
 
 3. Test the new functionality:
    - Ask questions that should trigger your feature
@@ -208,7 +208,7 @@ All contributors will be recognized in the project. By contributing, you agree:
 
 ### Prerequisites
 
-- An agent runtime: Claude Code (VSCode extension), AGY, OC, or another runtime with a Bash-equivalent tool
+- An agent runtime: Claude Code (VSCode extension), AGY, OpenCode, or another runtime with a Bash-equivalent tool
 - Node.js 16+ (for bitbucket-mcp)
 - Bitbucket account with app password
 - Git
