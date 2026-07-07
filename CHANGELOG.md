@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **`self-update` now redeploys in place for every runtime.** The file-copy
+  update path re-ran `install.sh` without a target, so it fell back to the
+  `--llm` default (Claude's `~/.claude/skills/...`). Updating an `agy` or
+  `opencode` install therefore redeployed into the Claude directory while
+  still marking the original install as up to date. `selfUpdate()` now pins
+  `TARGET_DIR` to the actual install directory (`SKILL_ROOT`), making the
+  redeploy runtime-agnostic and in-place.
+
 ### Added
 - **`create-pr` CLI command** (Tier 2) — create a pull request directly:
   `create-pr <workspace> <repo> <title> <source_branch> <target_branch> [description] [reviewers_csv]`.
