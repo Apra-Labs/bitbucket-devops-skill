@@ -357,6 +357,28 @@ stop-pipeline <workspace> <repo> <build_number_or_uuid>
 
 ### Pull Request Operations
 
+#### create-pr
+Create a new pull request from a source branch into a target branch.
+
+```bash
+create-pr <workspace> <repo> <title> <source_branch> <target_branch> [description] [reviewers_csv]
+```
+
+**Parameters:**
+- `title`: PR title (required)
+- `source_branch`: Branch containing the changes (required)
+- `target_branch`: Branch to merge into, e.g. `main` (required)
+- `description`: Optional PR description/body
+- `reviewers_csv`: Optional comma-separated list of reviewer account UUIDs, e.g. `"{uuid-1},{uuid-2}"`
+
+**Requires scope:** `write:pullrequest:bitbucket` (`Pull requests: Write`).
+
+**Returns:** The created PR object (including its `id` and web `links`).
+
+> Use this instead of falling back to a raw Tier 3 API call to `POST /repositories/{workspace}/{repo}/pullrequests`.
+
+---
+
 #### list-prs
 List pull requests for a repository.
 

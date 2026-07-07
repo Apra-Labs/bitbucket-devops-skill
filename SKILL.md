@@ -86,6 +86,7 @@ Direct API wrappers for specific operations. You MUST use these for operations n
 - `stop-pipeline <workspace> <repo> <pipeline-uuid>`
 
 **Pull Request Operations:**
+- `create-pr <workspace> <repo> <title> <source_branch> <target_branch> [description] [reviewers_csv]`
 - `list-prs <workspace> <repo> [state] [limit]`
 - `get-pr <workspace> <repo> <pr_id>`
 - `approve-pr <workspace> <repo> <pr_id>`
@@ -164,7 +165,7 @@ This skill's originally documented scope (`Repositories: Read, Pipelines: Read` 
 | pipeline read commands (list-pipelines, get-pipeline*, etc.) | `read:pipeline:bitbucket` | `Pipelines: Read` |
 | `create-deploy-variable`, `update-deploy-variable`, `delete-deploy-variable` | `write:pipeline:bitbucket` -- confirmed sufficient in practice, no separate "edit variables" scope exists in the scoped-token model | `Pipelines: Edit variables` |
 | `create-environment` | **`admin:pipeline:bitbucket`** -- CONFIRMED via a live 403 response (see below); `write:pipeline:bitbucket` alone is NOT sufficient | Unclear under the classic model; likely needs `Repositories: Admin` |
-| `approve-pr`/`merge-pr`/`decline-pr` | `write:pullrequest:bitbucket` | `Pull requests: Write` |
+| `create-pr`/`approve-pr`/`merge-pr`/`decline-pr` | `write:pullrequest:bitbucket` | `Pull requests: Write` |
 
 **Debugging tip, generalizable to any scope-mismatch**: Bitbucket's 403 response for a scope failure is self-diagnosing -- it returns a JSON body with both `required` and `granted` scope arrays, e.g.:
 ```json
