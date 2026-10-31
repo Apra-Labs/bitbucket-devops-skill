@@ -471,5 +471,5 @@ This skill is built on [bitbucket-mcp](https://github.com/Apra-Labs/bitbucket-mc
 
 **Architecture:** Uses bitbucket-mcp as a library (git submodule), NOT as an MCP server. This approach eliminates approval prompts while maintaining full API functionality.
 
-**License**: CC BY 4.0
+**License**: Apache-2.0
 **Maintained by**: [Apra Labs](https://github.com/Apra-Labs)

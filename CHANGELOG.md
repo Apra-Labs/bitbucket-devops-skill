@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `install.sh`.
 
 ### Changed
+- **License is now Apache-2.0** (was CC-BY-4.0), matching apra-fleet. The
+  plugin ships `LICENSE` and a generated `THIRD_PARTY_NOTICES.md` for the
+  MIT packages bundled into `bin/bitbucket-cli.mjs`.
 - `lib/helpers.js` uses `bin/bitbucket-cli.mjs` when present and falls back to
   `bitbucket-mcp/dist/index-cli.js`, so both install routes work.
 - In a plugin install, `self-update` and `check-for-updates` print

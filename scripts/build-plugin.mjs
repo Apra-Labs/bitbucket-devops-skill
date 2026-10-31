@@ -106,8 +106,9 @@ fs.mkdirSync(join(SKILL_OUT, 'docs'), { recursive: true });
 fs.mkdirSync(join(OUT, '.claude-plugin'), { recursive: true });
 
 // 2. Bundle the CLI from TypeScript source into one self-contained ESM file.
-await build({
+const { metafile } = await build({
   entryPoints: [join(MCP_DIR, 'src', 'index-cli.ts')],
+  metafile: true,
   outfile: join(SKILL_OUT, 'bin', 'bitbucket-cli.mjs'),
   bundle: true,
   platform: 'node',
@@ -119,7 +120,30 @@ await build({
   logLevel: 'warning',
 });
 
+// Bundling inlines bitbucket-mcp and its npm deps, whose licenses require
+// their notices to travel with the code: list every package esbuild used.
+const pkgDirs = new Set([MCP_DIR]);
+for (const input of Object.keys(metafile.inputs)) {
+  const m = input.replace(/\\/g, '/').match(/^(.*node_modules\/(?:@[^/]+\/)?[^/]+)\//);
+  if (m) pkgDirs.add(join(process.cwd(), m[1])); // metafile paths are cwd-relative
+}
+const notices = [...pkgDirs]
+  .map((dir) => {
+    if (!fs.existsSync(join(dir, 'package.json'))) fail(`bundled package without package.json: ${dir}`);
+    const p = JSON.parse(fs.readFileSync(join(dir, 'package.json'), 'utf-8'));
+    const licFile = fs.readdirSync(dir).find((f) => /^(licen[cs]e|copying)(\.|$)/i.test(f));
+    if (!licFile) fail(`bundled package ${p.name} has no license file`);
+    return { name: p.name, version: p.version, license: p.license, text: fs.readFileSync(join(dir, licFile), 'utf-8').trim() };
+  })
+  .sort((a, b) => a.name.localeCompare(b.name));
+
 // 3. Runtime files.
+fs.copyFileSync(join(ROOT, 'LICENSE'), join(OUT, 'LICENSE'));
+fs.writeFileSync(
+  join(OUT, 'THIRD_PARTY_NOTICES.md'),
+  '# Third-party notices\n\n`skills/bitbucket-devops/bin/bitbucket-cli.mjs` bundles the packages below.\n\n' +
+    notices.map((n) => `## ${n.name} ${n.version} (${n.license})\n\n\`\`\`\n${n.text}\n\`\`\`\n`).join('\n')
+);
 fs.copyFileSync(join(ROOT, 'lib', 'helpers.js'), join(SKILL_OUT, 'lib', 'helpers.js'));
 fs.copyFileSync(join(ROOT, 'credentials.json.template'), join(SKILL_OUT, 'credentials.json.template'));
 // helpers.js is ESM; Node 18 needs "type": "module" to load it. No lockfile, so
