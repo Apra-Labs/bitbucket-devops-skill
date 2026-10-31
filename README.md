@@ -152,6 +152,19 @@ Create a Bitbucket App Password with these scopes:
 
 ## Installation
 
+### Claude Code plugin
+
+Requires Node.js 18+. Nothing is built on your machine:
+
+```
+/plugin marketplace add Apra-Labs/agent-marketplace
+/plugin install bitbucket-devops@apra
+```
+
+Put credentials in `~/.bitbucket-credentials` (see [Configure Credentials](#configure-credentials)); never inside the plugin folder, which is replaced on update. Update with `/plugin marketplace update apra`.
+
+To build the plugin from this repo: `npm ci && npm run build:plugin` writes it to `dist-plugin/`.
+
 ### Quick Install (Recommended)
 
 **Clone and run the installer:**

@@ -5,7 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.3.0] - Unreleased
+
+### Added
+- **Claude Code plugin build.** `npm run build:plugin` writes a complete
+  plugin to `dist-plugin/` for the Apra Labs marketplace
+  (`/plugin install bitbucket-devops@apra`). bitbucket-mcp's CLI is bundled
+  with esbuild into one self-contained `bin/bitbucket-cli.mjs`, so the plugin
+  ships no `node_modules` and needs no build on install. The plugin copies of
+  `SKILL.md` and `docs/` use `${CLAUDE_SKILL_DIR}` instead of
+  `~/.claude/skills/...` paths; the source `SKILL.md` is unchanged for
+  `install.sh`.
+
+### Changed
+- `lib/helpers.js` uses `bin/bitbucket-cli.mjs` when present and falls back to
+  `bitbucket-mcp/dist/index-cli.js`, so both install routes work.
+- In a plugin install, `self-update` and `check-for-updates` print
+  "Installed as a Claude Code plugin - update with /plugin marketplace update
+  apra" and exit 0 instead of updating files Claude Code manages.
+- Docs examples use placeholder workspace/repo/email values.
 
 ### Fixed
 - **`self-update` now redeploys in place for every runtime.** The file-copy

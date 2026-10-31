@@ -6,7 +6,7 @@ Through testing, we've discovered that Bitbucket has **DIFFERENT** authenticatio
 
 ### Test Results Summary
 
-| Operation Type | Email (`akhil@apra.in`) | Username (`kumaakh`) |
+| Operation Type | Email (`you@example.com`) | Username (`myworkspace`) |
 |----------------|------------------------|---------------------|
 | **API Calls** | ✅ **Works** (HTTP 200) | ❌ **Fails** (HTTP 401) |
 | **Git Operations** | ❌ **Fails** (Auth failed) | ✅ **Works** (Success) |
@@ -16,24 +16,24 @@ Through testing, we've discovered that Bitbucket has **DIFFERENT** authenticatio
 #### API Authentication Test
 ```bash
 # With EMAIL - SUCCESS
-curl -u "akhil@apra.in:APP_PASSWORD" \
-  "https://api.bitbucket.org/2.0/repositories/kumaakh"
+curl -u "you@example.com:APP_PASSWORD" \
+  "https://api.bitbucket.org/2.0/repositories/myworkspace"
 # Result: HTTP 200 ✅
 
 # With USERNAME - FAILURE
-curl -u "kumaakh:APP_PASSWORD" \
-  "https://api.bitbucket.org/2.0/repositories/kumaakh"
+curl -u "myworkspace:APP_PASSWORD" \
+  "https://api.bitbucket.org/2.0/repositories/myworkspace"
 # Result: HTTP 401 Unauthorized ❌
 ```
 
 #### Git Authentication Test
 ```bash
 # With EMAIL - FAILURE
-git ls-remote https://akhil%40apra.in:APP_PASSWORD@bitbucket.org/kumaakh/repo.git HEAD
+git ls-remote https://you%40example.com:APP_PASSWORD@bitbucket.org/myworkspace/repo.git HEAD
 # Result: Authentication failed ❌
 
 # With USERNAME - SUCCESS
-git ls-remote https://kumaakh:APP_PASSWORD@bitbucket.org/kumaakh/repo.git HEAD
+git ls-remote https://myworkspace:APP_PASSWORD@bitbucket.org/myworkspace/repo.git HEAD
 # Result: Returns HEAD commit ✅
 ```
 
@@ -51,9 +51,9 @@ The skill now uses separate fields for API and git operations:
 ```json
 {
   "url": "https://api.bitbucket.org/2.0",
-  "workspace": "kumaakh",
-  "user_email": "akhil@apra.in",
-  "username": "kumaakh",
+  "workspace": "myworkspace",
+  "user_email": "you@example.com",
+  "username": "myworkspace",
   "password": "APP_PASSWORD"
 }
 ```
@@ -87,7 +87,7 @@ export function buildGitUrl(workspace, repo) {
   const creds = loadCredentials();
 
   // Git operations use username (workspace slug), not user_email
-  const gitUsername = creds.username;  // "kumaakh" not "akhil@apra.in"
+  const gitUsername = creds.username;  // "myworkspace" not "you@example.com"
   const password = creds.password;
 
   const encodedPassword = encodeURIComponent(password);
@@ -126,16 +126,16 @@ The skill validates credentials and provides helpful errors:
 ```
 Error: Invalid credentials:
   'username' should be your Bitbucket username, not email.
-  Got: "akhil@apra.in" (this looks like an email)
-  Expected: Your workspace slug (e.g., "kumaakh")
-  Fix: Change "username": "akhil@apra.in" to "username": "kumaakh"
+  Got: "you@example.com" (this looks like an email)
+  Expected: Your workspace slug (e.g., "myworkspace")
+  Fix: Change "username": "you@example.com" to "username": "myworkspace"
 ```
 
 **Missing `user_email`:**
 ```
 Error: Missing required field:
   'user_email' (your Bitbucket account email) is required.
-  Example: "user_email": "akhil@apra.in"
+  Example: "user_email": "you@example.com"
 ```
 
 ## Using Git Operations
@@ -144,7 +144,7 @@ The skill includes built-in git helper commands:
 
 ### Test Git Authentication
 ```bash
-node lib/helpers.js test-git-auth kumaakh apra-licensing-core
+node lib/helpers.js test-git-auth myworkspace my-repo
 ```
 
 **Output:**
@@ -152,13 +152,13 @@ node lib/helpers.js test-git-auth kumaakh apra-licensing-core
 {
   "success": true,
   "commit": "372812ce91cd5f27df3bd7dcdb00ffd20ab704ce",
-  "message": "Git authentication successful for kumaakh/apra-licensing-core"
+  "message": "Git authentication successful for myworkspace/my-repo"
 }
 ```
 
 ### Clone a Repository
 ```bash
-node lib/helpers.js clone-repo kumaakh my-repo [target-dir]
+node lib/helpers.js clone-repo myworkspace my-repo [target-dir]
 ```
 
 **Output:**
@@ -166,7 +166,7 @@ node lib/helpers.js clone-repo kumaakh my-repo [target-dir]
 {
   "success": true,
   "directory": "my-repo",
-  "message": "Successfully cloned kumaakh/my-repo to my-repo"
+  "message": "Successfully cloned myworkspace/my-repo to my-repo"
 }
 ```
 

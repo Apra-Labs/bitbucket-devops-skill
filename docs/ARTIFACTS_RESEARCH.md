@@ -2,7 +2,7 @@
 
 **Date:** 2025-11-03
 **Researcher:** Claude (Sonnet 4.5)
-**Test Case:** apra-licensing-core build #51
+**Test Case:** my-repo build #51
 
 ## Problem Statement
 
@@ -19,7 +19,7 @@ Bitbucket Pipelines allow steps to produce artifacts (defined in `bitbucket-pipe
 - Step details endpoint (`/repositories/{workspace}/{repo}/pipelines/{uuid}/steps/{step_uuid}`) returns step info but NO artifact links
 - Teardown commands show `UPLOAD_ARTIFACTS` action but provide no download mechanism
 
-### 2. Test Case: apra-licensing-core Build #51
+### 2. Test Case: my-repo Build #51
 
 **Pipeline UUID:** `{1acf2818-e3e1-4f07-992c-e8139e9929e7}`
 
@@ -35,7 +35,7 @@ Bitbucket Pipelines allow steps to produce artifacts (defined in `bitbucket-pipe
    - Has `UPLOAD_ARTIFACTS` in teardown_commands
 
 3. Step UUID: (third step - Create Release Package)
-   - Creates: `apra-licensing-libs-{date}-{sha}.zip`
+   - Creates: `my-libs-{date}-{sha}.zip`
    - Should have this as artifact
 
 **API Response Analysis:**
@@ -153,13 +153,13 @@ node helpers.js download-latest-artifact <workspace> <repo> <pattern>
 ```bash
 # User: "Download the latest licensing libraries build"
 # Agent:
-node helpers.js download-latest-artifact "kumaakh" "apra-licensing-core" "apra-licensing-libs-*.zip"
+node helpers.js download-latest-artifact "myworkspace" "my-repo" "my-libs-*.zip"
 ```
 
 ## Next Steps
 
 1. ✅ Complete research (DONE)
-2. ⏳ Test Downloads API with apra-licensing-core
+2. ⏳ Test Downloads API with my-repo
 3. ⏳ Add downloads commands to CLI
 4. ⏳ Create helper functions
 5. ⏳ Update SKILL.md
