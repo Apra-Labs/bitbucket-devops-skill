@@ -195,7 +195,7 @@ Update these files when adding features:
 All contributors will be recognized in the project. By contributing, you agree:
 
 1. Your contributions are your own work
-2. You grant Apra Labs rights to use your contribution under CC BY 4.0
+2. You grant Apra Labs rights to use your contribution under the Apache License 2.0
 3. You agree to be listed in contributors
 
 ## Questions?
@@ -260,7 +260,7 @@ Maintainers will:
 
 ## License
 
-By contributing, you agree your contributions will be licensed under CC BY 4.0.
+By contributing, you agree your contributions will be licensed under the Apache License 2.0.
 
 ---
 

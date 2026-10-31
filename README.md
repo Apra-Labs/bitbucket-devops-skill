@@ -2,7 +2,7 @@
 
 An agent-runtime-agnostic skill for comprehensive Bitbucket DevOps automation - manage pipelines, repositories, pull requests, and CI/CD workflows. It's a plain, Bash-invocable Node.js CLI with no Claude-specific API or tool dependency, so it works as-is with [Claude Code](https://claude.ai/code), AGY, OpenCode, and any other agent runtime that can shell out to `node`. Built on the [bitbucket-mcp](https://github.com/MatanYemini/bitbucket-mcp) Model Context Protocol server, used here purely as a library (see [How This Skill Works](#how-this-skill-works)).
 
-[![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
 > **Developed by [Apra Labs](https://apralabs.com)** - Building AI-powered developer tools
 
@@ -460,16 +460,9 @@ We welcome contributions! See [CONTRIBUTING.md](./CONTRIBUTING.md) for guideline
 
 ## License
 
-This work is licensed under a [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/).
+Licensed under the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0). See [LICENSE](./LICENSE) for full details.
 
-**You are free to:**
-- ✅ Share — copy and redistribute in any medium or format
-- ✅ Adapt — remix, transform, and build upon the material
-
-**Under the following terms:**
-- **Attribution** — You must give appropriate credit to Apra Labs and link to this repository
-
-See [LICENSE](./LICENSE) for full details.
+The vendored [bitbucket-mcp](https://github.com/MatanYemini/bitbucket-mcp) submodule and its dependencies keep their own (MIT) licenses; the plugin build lists them in `THIRD_PARTY_NOTICES.md`.
 
 ## Support
 

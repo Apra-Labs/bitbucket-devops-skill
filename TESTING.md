@@ -299,7 +299,7 @@ Expected behavior:
 - [ ] Documentation is accurate
 - [ ] Examples work on fresh install
 - [ ] .gitignore properly configured
-- [ ] LICENSE file is correct (CC BY 4.0)
+- [ ] LICENSE file is correct (Apache-2.0)
 - [ ] Author attribution is correct
 - [ ] README credits bitbucket-mcp properly
 - [ ] GitHub issue links are valid
