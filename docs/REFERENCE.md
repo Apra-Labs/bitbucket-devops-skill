@@ -196,8 +196,8 @@ node ~/.claude/skills/bitbucket-devops/lib/helpers.js create-environment <worksp
 ```
 **Example:**
 ```bash
-node ~/.claude/skills/bitbucket-devops/lib/helpers.js create-environment kumaakh apra-fleet-cloud sandbox Test 0
-node ~/.claude/skills/bitbucket-devops/lib/helpers.js create-environment kumaakh apra-fleet-cloud production Production 1
+node ~/.claude/skills/bitbucket-devops/lib/helpers.js create-environment myworkspace my-repo sandbox Test 0
+node ~/.claude/skills/bitbucket-devops/lib/helpers.js create-environment myworkspace my-repo production Production 1
 ```
 **Returns:** The created environment object (includes its `uuid`, needed for the variable commands below unless you pass the environment `name` instead - all variable commands accept either).
 
@@ -219,8 +219,8 @@ node ~/.claude/skills/bitbucket-devops/lib/helpers.js create-deploy-variable <wo
 ```
 **Example:**
 ```bash
-node ~/.claude/skills/bitbucket-devops/lib/helpers.js create-deploy-variable kumaakh apra-fleet-cloud sandbox AWS_SECRET_ACCESS_KEY "..." true
-node ~/.claude/skills/bitbucket-devops/lib/helpers.js create-deploy-variable kumaakh apra-fleet-cloud sandbox AWS_REGION us-east-1 false
+node ~/.claude/skills/bitbucket-devops/lib/helpers.js create-deploy-variable myworkspace my-repo sandbox AWS_SECRET_ACCESS_KEY "..." true
+node ~/.claude/skills/bitbucket-devops/lib/helpers.js create-deploy-variable myworkspace my-repo sandbox AWS_REGION us-east-1 false
 ```
 `secured` defaults to `true` - pass `false` explicitly only for genuinely non-secret values. **Requires `Pipelines: Edit variables` scope.**
 

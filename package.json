@@ -1,6 +1,6 @@
 {
   "name": "bitbucket-devops-skill",
-  "version": "1.0.0",
+  "version": "1.3.0",
   "description": "An agent-runtime-agnostic skill for comprehensive Bitbucket DevOps automation (Claude Code, AGY, OC, and others)",
   "type": "module",
   "keywords": [
@@ -24,5 +24,14 @@
   "homepage": "https://github.com/Apra-Labs/bitbucket-devops-skill#readme",
   "bugs": {
     "url": "https://github.com/Apra-Labs/bitbucket-devops-skill/issues"
+  },
+  "scripts": {
+    "build:plugin": "node scripts/build-plugin.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "esbuild": "0.24.2"
   }
 }

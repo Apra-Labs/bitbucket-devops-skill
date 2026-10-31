@@ -40,3 +40,6 @@ yarn-error.log*
 *.temp
 .cache/
 .claude/
+
+# Claude Code plugin build output (npm run build:plugin)
+dist-plugin/

@@ -119,8 +119,8 @@ node ~/.claude/skills/bitbucket-devops/bitbucket-mcp/dist/index-cli.js \
 
 # 4. Check for email vs username confusion
 # API requires EMAIL, not username
-# If you see: "username": "kumaakh" → WRONG for API
-# Should be: "user_email": "akhil@apra.in"
+# If you see: "username": "myworkspace" → WRONG for API
+# Should be: "user_email": "you@example.com"
 ```
 
 ---
@@ -151,12 +151,12 @@ node ~/.claude/skills/bitbucket-devops/lib/helpers.js \
 
 # 3. Check for email vs username confusion
 # Git requires USERNAME (workspace slug), not email
-# If you see: "username": "akhil@apra.in" → WRONG for git
-# Should be: "username": "kumaakh"
+# If you see: "username": "you@example.com" → WRONG for git
+# Should be: "username": "myworkspace"
 
 # 4. Workspace slug is usually the first part of your repository URL
-# From: https://bitbucket.org/kumaakh/my-repo
-# Workspace: kumaakh (use this for git operations)
+# From: https://bitbucket.org/myworkspace/my-repo
+# Workspace: myworkspace (use this for git operations)
 ```
 
 ---
